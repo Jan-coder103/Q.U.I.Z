@@ -1,0 +1,12 @@
+[
+    {"q": "What is the capital of France?", "options": ["Paris", "Berlin", "Rome", "Madrid"], "answer": 0},
+    {"q": "What is the capital of Japan?", "options": ["Seoul", "Beijing", "Tokyo", "Bangkok"], "answer": 2},
+    {"q": "Which planet is known as the Red Planet?", "options": ["Venus", "Mars", "Jupiter", "Saturn"], "answer": 1},
+    {"q": "Who painted the Mona Lisa?", "options": ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"], "answer": 2},
+    {"q": "What is the largest ocean on Earth?", "options": ["Atlantic", "Indian", "Arctic", "Pacific"], "answer": 3},
+    {"q": "What is the capital of Brazil?", "options": ["Rio de Janeiro", "Brasilia", "Sao Paulo", "Lima"], "answer": 1},
+    {"q": "In which year did World War II end?", "options": ["1943", "1945", "1947", "1950"], "answer": 1},
+    {"q": "What is the tallest mountain in the world?", "options": ["K2", "Kangchenjunga", "Everest", "Lhotse"], "answer": 2},
+    {"q": "Which element has the chemical symbol 'Au'?", "options": ["Silver", "Aluminum", "Argon", "Gold"], "answer": 3},
+    {"q": "How many continents are there?", "options": ["5", "6", "7", "8"], "answer": 2}
+]

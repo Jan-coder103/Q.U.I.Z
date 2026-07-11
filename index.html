@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#08090f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Monster Quiz</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <!-- Animated aurora / nebula background -->
+    <div class="aurora-bg" aria-hidden="true">
+        <div class="aurora aurora-1"></div>
+        <div class="aurora aurora-2"></div>
+        <div class="aurora aurora-3"></div>
+        <div class="aurora aurora-4"></div>
+        <div class="grain"></div>
+    </div>
+
+    <main>
+        <!-- ============ QUIZ ============ -->
+        <section id="quiz-view">
+            <header class="view-header">
+                <h1>Quiz</h1>
+                <div id="score-display" class="points-pill">0</div>
+            </header>
+
+            <div id="quiz-container" class="glass-card">
+                <p id="round-info" class="round-info"></p>
+                <h2 id="question-text" class="question-text"></h2>
+                <div id="options-grid">
+                    <button class="option-btn"></button>
+                    <button class="option-btn"></button>
+                    <button class="option-btn"></button>
+                    <button class="option-btn"></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SETTINGS ============ -->
+        <section id="settings-view" class="hidden">
+            <header class="view-header">
+                <h1>Settings</h1>
+            </header>
+
+            <div class="settings-list">
+                <label class="setting-toggle glass-card">
+                    <span>Dark Mode</span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="toggle-darkmode">
+                        <span class="toggle-slider"></span>
+                    </span>
+                </label>
+                <label class="setting-toggle glass-card">
+                    <span>Sound Effects</span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="toggle-sound" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                </label>
+                <div class="seed-input-group glass-card">
+                    <label for="seed-input">Image Key</label>
+                    <div class="seed-input-row">
+                        <input type="text" id="seed-input" maxlength="6" placeholder="6-digit key" inputmode="numeric" pattern="[0-9]{6}">
+                        <button id="set-seed-btn" class="btn-accent">Set Key</button>
+                    </div>
+                </div>
+                <button id="clear-save-btn" class="btn-danger">Clear Save Data</button>
+                <button id="hide-features-btn" class="btn-danger hidden">Hide Collection</button>
+            </div>
+
+            <div id="secret-area">
+                <button class="secret-btn" data-num="1"></button>
+                <button class="secret-btn" data-num="2"></button>
+                <button class="secret-btn" data-num="3"></button>
+                <button class="secret-btn" data-num="4"></button>
+                <button class="secret-btn" data-num="5"></button>
+            </div>
+        </section>
+
+        <!-- ============ TICKETS ============ -->
+        <section id="tickets-view" class="hidden">
+            <header class="view-header">
+                <h1>Scratch Tickets</h1>
+                <div id="tickets-points" class="points-pill">0</div>
+            </header>
+
+            <div id="tickets-grid">
+                <div class="ticket-card glass-card" data-type="cheap">
+                    <div class="ticket-icon ticket-icon-cheap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+                    </div>
+                    <div class="ticket-body">
+                        <h3>Cheap Ticket</h3>
+                        <p class="ticket-desc">Common &amp; Uncommon</p>
+                    </div>
+                    <p class="ticket-cost">50</p>
+                </div>
+                <div class="ticket-card glass-card" data-type="normal">
+                    <div class="ticket-icon ticket-icon-normal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+                    </div>
+                    <div class="ticket-body">
+                        <h3>Normal Ticket</h3>
+                        <p class="ticket-desc">Uncommon to Epic</p>
+                    </div>
+                    <p class="ticket-cost">200</p>
+                </div>
+                <div class="ticket-card glass-card" data-type="expensive">
+                    <div class="ticket-icon ticket-icon-expensive">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+                    </div>
+                    <div class="ticket-body">
+                        <h3>Expensive Ticket</h3>
+                        <p class="ticket-desc">Rare to Cosmic</p>
+                    </div>
+                    <p class="ticket-cost">1000</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ GALLERY ============ -->
+        <section id="gallery-view" class="hidden">
+            <header class="view-header">
+                <h1>Gallery</h1>
+            </header>
+
+            <div id="key-required-overlay" class="key-overlay glass-card">
+                <div class="key-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                </div>
+                <h2>Key Required</h2>
+                <p>Set a 6-digit key in Settings to view your collection.</p>
+            </div>
+            <div id="gallery-grid"></div>
+        </section>
+    </main>
+
+    <nav id="nav-bar">
+        <button class="nav-btn" data-target="quiz-view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="18" cy="10" r="2.5"/><path d="M16.5 21a5.5 5.5 0 0 1 5.5-5"/></svg>
+            <span>Quiz</span>
+        </button>
+        <button class="nav-btn" data-target="settings-view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Settings</span>
+        </button>
+        <button class="nav-btn hidden" data-target="tickets-view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+            <span>Tickets</span>
+        </button>
+        <button class="nav-btn hidden" data-target="gallery-view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Gallery</span>
+        </button>
+    </nav>
+
+    <div id="modal-overlay" class="hidden">
+        <div id="modal-content" class="glass-card">
+            <img id="modal-image" class="hidden">
+            <h2 id="modal-title"></h2>
+            <p id="modal-body"></p>
+            <button id="modal-sell" class="btn-danger hidden">Sell</button>
+            <button id="modal-close" class="btn-accent">OK</button>
+        </div>
+    </div>
+
+    <div id="fullscreen-overlay" class="hidden">
+        <img id="fullscreen-image" alt="">
+    </div>
+
+    <script src="./js/app.js"></script>
+</body>
+</html>

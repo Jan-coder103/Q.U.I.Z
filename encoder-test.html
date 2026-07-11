@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Encoder Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 { margin-bottom: 20px; }
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .controls input, .controls button {
+            padding: 10px;
+            font-size: 1rem;
+            background: #16213e;
+            color: #eee;
+            border: 2px solid #0f3460;
+            border-radius: 6px;
+        }
+        .controls button {
+            cursor: pointer;
+            background: #0f3460;
+        }
+        .controls button:hover {
+            background: #1a4a80;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .canvas-box {
+            text-align: center;
+        }
+        .canvas-box h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        canvas {
+            width: 100%;
+            max-width: 256px;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+        }
+        .note {
+            margin-top: 20px;
+            padding: 16px;
+            background: #16213e;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Encoder / Decoder Test</h1>
+
+    <div class="controls">
+        <label>Seed: <input type="text" id="seed" value="123456" maxlength="6" inputmode="numeric"></label>
+        <button id="generate-btn">Generate Test Image</button>
+        <label>Upload 512x512: <input type="file" id="file-input" accept="image/*"></label>
+        <button id="encode-btn">Encode (Scramble)</button>
+        <button id="decode-btn">Decode (Unscramble)</button>
+        <button id="download-btn">Download Scrambled</button>
+    </div>
+
+    <div class="grid">
+        <div class="canvas-box">
+            <h3>Original</h3>
+            <canvas id="canvas-original" width="512" height="512"></canvas>
+        </div>
+        <div class="canvas-box">
+            <h3>Scrambled (Encoded)</h3>
+            <canvas id="canvas-scrambled" width="512" height="512"></canvas>
+        </div>
+        <div class="canvas-box">
+            <h3>Decoded (Recovered)</h3>
+            <canvas id="canvas-decoded" width="512" height="512"></canvas>
+        </div>
+    </div>
+
+    <div class="note">
+        <p><strong>How to use:</strong></p>
+        <p>1. Click "Generate Test Image" to create a patterned 512x512 image (or upload your own).</p>
+        <p>2. Click "Encode" to apply Stage 1 (color inversion) + Stage 2 (block shuffle).</p>
+        <p>3. Click "Decode" to reverse: Stage 1 (grid unshuffle) + Stage 2 (color re-inversion).</p>
+        <p>4. The "Decoded" canvas should match the "Original" exactly.</p>
+        <p>5. Use "Download Scrambled" to save the scrambled image for your <code>images/</code> folder.</p>
+        <p>The same Mulberry32 + Fisher-Yates logic is used here as in the PWA's decoder.</p>
+    </div>
+
+    <script>
+        const IMG_SIZE = 512;
+        const BLOCK_SIZE = 64;
+        const GRID_DIM = IMG_SIZE / BLOCK_SIZE;
+        const TOTAL_BLOCKS = GRID_DIM * GRID_DIM;
+
+        function mulberry32(a) {
+            return function() {
+                a |= 0;
+                a = a + 0x6D2B79F5 | 0;
+                var t = Math.imul(a ^ a >>> 15, 1 | a);
+                t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            };
+        }
+
+        function generateShuffleOrder(seed) {
+            const order = [];
+            for (let i = 0; i < TOTAL_BLOCKS; i++) order.push(i);
+            const rand = mulberry32(parseInt(seed, 10));
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(rand() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+            return order;
+        }
+
+        function getSeed() {
+            return document.getElementById('seed').value;
+        }
+
+        function generateTestImage() {
+            const canvas = document.getElementById('canvas-original');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, IMG_SIZE, IMG_SIZE);
+
+            for (let r = 0; r < GRID_DIM; r++) {
+                for (let c = 0; c < GRID_DIM; c++) {
+                    const hue = (r * GRID_DIM + c) * (360 / TOTAL_BLOCKS);
+                    ctx.fillStyle = 'hsl(' + hue + ', 70%, 50%)';
+                    ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(String(r * GRID_DIM + c), c * BLOCK_SIZE + BLOCK_SIZE / 2, r * BLOCK_SIZE + BLOCK_SIZE / 2 + 7);
+                }
+            }
+            ctx.fillStyle = '#e94560';
+            ctx.font = 'bold 32px Arial';
+            ctx.fillText('TOP LEFT', 90, 30);
+        }
+
+        function encode() {
+            const origCanvas = document.getElementById('canvas-original');
+            const scrCanvas = document.getElementById('canvas-scrambled');
+            const scrCtx = scrCanvas.getContext('2d');
+
+            scrCtx.drawImage(origCanvas, 0, 0);
+
+            const imageData = scrCtx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = 255 - data[i];
+                data[i + 1] = 255 - data[i + 1];
+                data[i + 2] = 255 - data[i + 2];
+            }
+            scrCtx.putImageData(imageData, 0, 0);
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = IMG_SIZE;
+            tempCanvas.height = IMG_SIZE;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(scrCanvas, 0, 0);
+
+            scrCtx.clearRect(0, 0, IMG_SIZE, IMG_SIZE);
+
+            const perm = generateShuffleOrder(getSeed());
+            for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                const destBlock = perm[i];
+                const srcCol = i % GRID_DIM;
+                const srcRow = Math.floor(i / GRID_DIM);
+                const destCol = destBlock % GRID_DIM;
+                const destRow = Math.floor(destBlock / GRID_DIM);
+                scrCtx.drawImage(
+                    tempCanvas,
+                    srcCol * BLOCK_SIZE, srcRow * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+                    destCol * BLOCK_SIZE, destRow * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                );
+            }
+        }
+
+        function decode() {
+            const scrCanvas = document.getElementById('canvas-scrambled');
+            const decCanvas = document.getElementById('canvas-decoded');
+            const decCtx = decCanvas.getContext('2d');
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = IMG_SIZE;
+            tempCanvas.height = IMG_SIZE;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(scrCanvas, 0, 0);
+
+            decCtx.clearRect(0, 0, IMG_SIZE, IMG_SIZE);
+
+            const perm = generateShuffleOrder(getSeed());
+            for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                const srcBlock = perm[i];
+                const srcCol = srcBlock % GRID_DIM;
+                const srcRow = Math.floor(srcBlock / GRID_DIM);
+                const destCol = i % GRID_DIM;
+                const destRow = Math.floor(i / GRID_DIM);
+                decCtx.drawImage(
+                    tempCanvas,
+                    srcCol * BLOCK_SIZE, srcRow * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+                    destCol * BLOCK_SIZE, destRow * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                );
+            }
+
+            const imageData = decCtx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = 255 - data[i];
+                data[i + 1] = 255 - data[i + 1];
+                data[i + 2] = 255 - data[i + 2];
+            }
+            decCtx.putImageData(imageData, 0, 0);
+        }
+
+        function downloadScrambled() {
+            const scrCanvas = document.getElementById('canvas-scrambled');
+            const link = document.createElement('a');
+            link.download = 'monster-scrambled.webp';
+            link.href = scrCanvas.toDataURL('image/webp');
+            link.click();
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.getElementById('canvas-original');
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, IMG_SIZE, IMG_SIZE);
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', generateTestImage);
+        document.getElementById('encode-btn').addEventListener('click', encode);
+        document.getElementById('decode-btn').addEventListener('click', decode);
+        document.getElementById('download-btn').addEventListener('click', downloadScrambled);
+        document.getElementById('file-input').addEventListener('change', handleFileUpload);
+
+        generateTestImage();
+    </script>
+</body>
+</html>
