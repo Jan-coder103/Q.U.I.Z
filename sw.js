@@ -1,4 +1,4 @@
-const CACHE_NAME = 'monster-v1';
+const CACHE_NAME = 'monster-v2';
 const CORE_ASSETS = [
     './',
     './index.html',
