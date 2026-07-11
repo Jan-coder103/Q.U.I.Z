@@ -496,21 +496,25 @@ section h1 {
 #secret-area {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 16px;
     margin-top: 60px;
-    padding: 24px 0;
+    padding: 20px 0;
 }
 .secret-btn {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
     border: none;
     border-radius: 50%;
-    background: transparent;
+    background: rgba(255,255,255,0.04);
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
     transition: background .2s;
 }
 .secret-btn:hover, .secret-btn:active {
-    background: rgba(255,255,255,0.015);
+    background: rgba(255,255,255,0.07);
 }
 
 /* ===================== TICKETS ===================== */
