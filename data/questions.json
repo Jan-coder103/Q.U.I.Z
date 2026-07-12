@@ -98,7 +98,7 @@
   {"q": "When did Germany last host the Football World Cup before 2026?", "options": ["1990", "2010", "2006", "1974"], "answer": 2},
   {"q": "When did the World Wide Web become public?", "options": ["1985", "2000", "1991", "1995"], "answer": 2},
   {"q": "When were the first modern Olympic Games?", "options": ["1900", "1880", "1896", "1924"], "answer": 2},
-  {"q": "When did Leonardo da Vinci live?", "options": ["1300-1370", "1600-1680", "1452-1519", "1800-1870"], "answer": 2}
+  {"q": "When did Leonardo da Vinci live?", "options": ["1300-1370", "1600-1680", "1452-1519", "1800-1870"], "answer": 2},
   {"q": "What is the capital of Portugal?", "options": ["Lisbon", "Porto", "Faro", "Madrid"], "answer": 0},
   {"q": "What is the capital of Ireland?", "options": ["Belfast", "Dublin", "Cork", "Galway"], "answer": 1},
   {"q": "What is the capital of Czech Republic?", "options": ["Bratislava", "Warsaw", "Prague", "Vienna"], "answer": 2},
