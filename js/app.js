@@ -37,7 +37,7 @@ const monsterDB = [
 const ticketCosts = { cheap: 50, normal: 200, expensive: 1000 };
 
 const IMG_SIZE = 512;
-const BLOCK_SIZE = 32;
+const BLOCK_SIZE = 16;
 const GRID_DIM = IMG_SIZE / BLOCK_SIZE;
 const TOTAL_BLOCKS = GRID_DIM * GRID_DIM;
 

@@ -103,7 +103,7 @@
 
     <script>
         const IMG_SIZE = 512;
-        const BLOCK_SIZE = 32;
+        const BLOCK_SIZE = 16;
         const GRID_DIM = IMG_SIZE / BLOCK_SIZE;
         const TOTAL_BLOCKS = GRID_DIM * GRID_DIM;
 
@@ -144,9 +144,9 @@
                     ctx.fillStyle = 'hsl(' + hue + ', 70%, 50%)';
                     ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                     ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 20px Arial';
+                    ctx.font = 'bold 9px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText(String(r * GRID_DIM + c), c * BLOCK_SIZE + BLOCK_SIZE / 2, r * BLOCK_SIZE + BLOCK_SIZE / 2 + 7);
+                    ctx.fillText(String(r * GRID_DIM + c), c * BLOCK_SIZE + BLOCK_SIZE / 2, r * BLOCK_SIZE + BLOCK_SIZE / 2 + 3);
                 }
             }
             ctx.fillStyle = '#e94560';
