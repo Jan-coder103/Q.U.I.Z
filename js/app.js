@@ -24,9 +24,7 @@ const monsterDB = [
     { id: 8, name: "Ghost", rarity: "Uncommon" },
     { id: 9, name: "Ogre", rarity: "Rare" },
     { id: 10, name: "Gargoyle", rarity: "Rare" },
-    { id: 11, name: "Harpy", rarity: "Rare" },
     { id: 12, name: "Wraith", rarity: "Epic" },
-    { id: 13, name: "Chimera", rarity: "Epic" },
     { id: 14, name: "Banshee", rarity: "Epic" },
     { id: 15, name: "Dragon", rarity: "Legendary" },
     { id: 16, name: "Phoenix", rarity: "Legendary" },
@@ -57,6 +55,15 @@ const rarityColors = {
     "Epic": "#9b59b6",
     "Legendary": "#f39c12",
     "Cosmic": "#e91e63"
+};
+
+const RARITY_RANGES = {
+    "Common":    { start: 1,    end: 999 },
+    "Uncommon":  { start: 1000, end: 1999 },
+    "Rare":      { start: 2000, end: 2999 },
+    "Epic":      { start: 3000, end: 3999 },
+    "Legendary": { start: 4000, end: 4999 },
+    "Cosmic":    { start: 9000, end: 9999 }
 };
 
 function saveData() {
@@ -394,6 +401,30 @@ function generatePlaceholder(monster) {
     return canvas.toDataURL("image/png");
 }
 
+function getMonsterImageRange(monster) {
+    const tier = monsterDB.filter(m => m.rarity === monster.rarity);
+    const index = tier.findIndex(m => m.id === monster.id);
+    const span = RARITY_RANGES[monster.rarity];
+    const total = span.end - span.start + 1;
+    const per = Math.floor(total / tier.length);
+    const rangeStart = span.start + index * per;
+    const rangeEnd = (index === tier.length - 1) ? span.end : rangeStart + per - 1;
+    return { start: rangeStart, end: rangeEnd };
+}
+
+async function loadMonsterImage(monster) {
+    const { start, end } = getMonsterImageRange(monster);
+    const count = end - start + 1;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        const n = start + Math.floor(Math.random() * count);
+        const file = './images/' + String(n).padStart(4, '0') + '.webp';
+        try {
+            return await decryptImage(file, gameState.seed);
+        } catch (e) { }
+    }
+    return generatePlaceholder(monster);
+}
+
 async function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     const keyOverlay = document.getElementById('key-required-overlay');
@@ -423,17 +454,7 @@ async function renderGallery() {
         const img = document.createElement('img');
         img.alt = monster.name;
 
-        try {
-            const decrypted = await decryptImage('./images/monster-' + id + '.webp', gameState.seed);
-            img.src = decrypted;
-        } catch (e) {
-            try {
-                const decrypted = await decryptImage('./images/0001.webp', gameState.seed);
-                img.src = decrypted;
-            } catch (e2) {
-                img.src = generatePlaceholder(monster);
-            }
-        }
+        img.src = await loadMonsterImage(monster);
 
         const nameEl = document.createElement('p');
         nameEl.textContent = monster.name;
