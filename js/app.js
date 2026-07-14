@@ -24,21 +24,11 @@ let secretBuffer = [];
 
 const monsterDB = [
     { id: 1, name: "Slime", rarity: "Common" },
-    { id: 2, name: "Bat", rarity: "Common" },
-    { id: 3, name: "Rat", rarity: "Common" },
-    { id: 4, name: "Spider", rarity: "Common" },
     { id: 5, name: "Goblin", rarity: "Uncommon" },
-    { id: 6, name: "Wolf", rarity: "Uncommon" },
-    { id: 7, name: "Skeleton", rarity: "Uncommon" },
-    { id: 8, name: "Ghost", rarity: "Uncommon" },
-    { id: 9, name: "Ogre", rarity: "Rare" },
-    { id: 10, name: "Gargoyle", rarity: "Rare" },
+    { id: 9, name: "Gargoyle", rarity: "Rare" },
     { id: 12, name: "Wraith", rarity: "Epic" },
-    { id: 14, name: "Banshee", rarity: "Epic" },
     { id: 15, name: "Dragon", rarity: "Legendary" },
-    { id: 16, name: "Phoenix", rarity: "Legendary" },
-    { id: 17, name: "Kraken", rarity: "Cosmic" },
-    { id: 18, name: "Leviathan", rarity: "Cosmic" }
+    { id: 17, name: "Kraken", rarity: "Cosmic" }
 ];
 
 const ticketCosts = { cheap: 50, normal: 200, expensive: 1000 };
