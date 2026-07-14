@@ -1,11 +1,11 @@
 const SUPABASE_URL = 'https://zzgbfxjmesxkdvayqkhs.supabase.co';
 const SUPABASE_BUCKET = 'puzzle-images';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, '') : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, '') : null;
 
 function getMonsterImageUrl(n) {
     const name = String(n).padStart(4, '0') + '.webp';
-    if (supabase) {
-        return supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(name).data.publicUrl;
+    if (supabaseClient) {
+        return supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(name).data.publicUrl;
     }
     return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${name}`;
 }
