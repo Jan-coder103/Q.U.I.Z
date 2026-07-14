@@ -73,6 +73,12 @@ function loadData() {
     const saved = localStorage.getItem('monsterData');
     if (saved) {
         gameState = JSON.parse(saved);
+        if (Array.isArray(gameState.inventory)) {
+            gameState.inventory = gameState.inventory.map(entry => {
+                if (entry && typeof entry === 'object') return entry;
+                return { id: entry, imgNum: null };
+            });
+        }
     }
 }
 
@@ -421,11 +427,23 @@ function getMonsterImageRange(monster) {
     return { start: rangeStart, end: rangeEnd };
 }
 
-async function loadMonsterImage(monster) {
+function pickImageNumber(monster) {
     const { start, end } = getMonsterImageRange(monster);
-    const count = end - start + 1;
-    for (let attempt = 0; attempt < 3; attempt++) {
-        const n = start + Math.floor(Math.random() * count);
+    return start + Math.floor(Math.random() * (end - start + 1));
+}
+
+async function loadMonsterImage(monster, imgNum) {
+    const targets = [];
+    if (imgNum != null) {
+        targets.push(imgNum);
+    } else {
+        const { start, end } = getMonsterImageRange(monster);
+        const count = end - start + 1;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            targets.push(start + Math.floor(Math.random() * count));
+        }
+    }
+    for (const n of targets) {
         try {
             return await decryptImage(getMonsterImageUrl(n), gameState.seed);
         } catch (e) { }
@@ -455,8 +473,8 @@ async function renderGallery() {
         return;
     }
 
-    for (const id of gameState.inventory) {
-        const monster = monsterDB.find(m => m.id === id);
+    for (const entry of gameState.inventory) {
+        const monster = monsterDB.find(m => m.id === entry.id);
         if (!monster) continue;
 
         const card = document.createElement('div');
@@ -465,7 +483,7 @@ async function renderGallery() {
         const img = document.createElement('img');
         img.alt = monster.name;
 
-        img.src = await loadMonsterImage(monster);
+        img.src = await loadMonsterImage(monster, entry.imgNum);
 
         const nameEl = document.createElement('p');
         nameEl.textContent = monster.name;
@@ -552,7 +570,7 @@ function attachHoldToSell(btn, onConfirm) {
 }
 
 function sellMonster(monster) {
-    const index = gameState.inventory.indexOf(monster.id);
+    const index = gameState.inventory.findIndex(e => e.id === monster.id);
     if (index === -1) return;
 
     gameState.inventory.splice(index, 1);
@@ -604,7 +622,7 @@ function rollRarity(ticketType) {
 }
 
 function selectMonster(rarity) {
-    const owned = new Set(gameState.inventory);
+    const owned = new Set(gameState.inventory.map(e => e.id));
     const available = monsterDB.filter(m => m.rarity === rarity && !owned.has(m.id));
     if (available.length === 0) return null;
     return available[Math.floor(Math.random() * available.length)];
@@ -627,7 +645,7 @@ function buyTicket(ticketType) {
     const monster = selectMonster(rarity);
 
     if (monster) {
-        gameState.inventory.push(monster.id);
+        gameState.inventory.push({ id: monster.id, imgNum: pickImageNumber(monster) });
         saveData();
         showModal("You caught a monster!", monster.name, monster.rarity);
     } else {
