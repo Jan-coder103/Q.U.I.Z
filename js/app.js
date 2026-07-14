@@ -422,6 +422,9 @@ async function loadMonsterImage(monster) {
             return await decryptImage(file, gameState.seed);
         } catch (e) { }
     }
+    try {
+        return await decryptImage('./images/0000.webp', gameState.seed);
+    } catch (e) { }
     return generatePlaceholder(monster);
 }
 
@@ -487,13 +490,57 @@ function openMonsterDetail(monster, imgSrc) {
     imgEl.style.cursor = 'zoom-in';
     imgEl.onclick = () => showFullscreenImage(imgSrc);
 
-    sellBtn.textContent = 'Sell for ' + sellPrices[monster.rarity] + ' pts';
+    sellBtn.dataset.sellLabel = 'Sell for ' + sellPrices[monster.rarity] + ' pts';
     sellBtn.classList.remove('hidden');
-    sellBtn.onclick = () => {
-        sellMonster(monster);
-    };
+    attachHoldToSell(sellBtn, () => sellMonster(monster));
 
     overlay.classList.remove('hidden');
+}
+
+function attachHoldToSell(btn, onConfirm) {
+    if (!btn._holdWired) {
+        btn.innerHTML = '<span class="sell-fill"></span><span class="sell-label"></span>';
+        let holdTimer = null;
+
+        const startHold = (e) => {
+            e.preventDefault();
+            const fill = btn.querySelector('.sell-fill');
+            btn.classList.remove('holding');
+            fill.style.transition = 'none';
+            fill.style.width = '0%';
+            void fill.offsetWidth;
+            fill.style.transition = '';
+            fill.style.width = '';
+            btn.classList.add('holding');
+            holdTimer = setTimeout(() => {
+                holdTimer = null;
+                btn.classList.remove('holding');
+                fill.style.width = '0%';
+                if (btn._holdCallback) btn._holdCallback();
+            }, 2000);
+        };
+
+        const cancelHold = () => {
+            if (holdTimer) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
+            btn.classList.remove('holding');
+            const fill = btn.querySelector('.sell-fill');
+            if (fill) fill.style.width = '0%';
+        };
+
+        btn.addEventListener('mousedown', startHold);
+        btn.addEventListener('touchstart', startHold, { passive: false });
+        btn.addEventListener('mouseup', cancelHold);
+        btn.addEventListener('mouseleave', cancelHold);
+        btn.addEventListener('touchend', cancelHold);
+        btn.addEventListener('touchcancel', cancelHold);
+        btn._holdWired = true;
+    }
+
+    btn.querySelector('.sell-label').textContent = btn.dataset.sellLabel || 'Sell';
+    btn._holdCallback = onConfirm;
 }
 
 function sellMonster(monster) {

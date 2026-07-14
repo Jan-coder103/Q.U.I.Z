@@ -730,6 +730,26 @@ section h1 {
 }
 #modal-sell {
     margin-bottom: 9px;
+    position: relative;
+    overflow: hidden;
+}
+#modal-sell .sell-label {
+    position: relative;
+    z-index: 1;
+}
+#modal-sell .sell-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: rgba(255, 255, 255, 0.28);
+    z-index: 0;
+    pointer-events: none;
+}
+#modal-sell.holding .sell-fill {
+    width: 100%;
+    transition: width 2s linear;
 }
 #modal-close {
     width: 100%;
