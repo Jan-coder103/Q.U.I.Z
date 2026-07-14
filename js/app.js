@@ -1,3 +1,15 @@
+const SUPABASE_URL = 'https://zzgbfxjmesxkdvayqkhs.supabase.co';
+const SUPABASE_BUCKET = 'puzzle-images';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, '') : null;
+
+function getMonsterImageUrl(n) {
+    const name = String(n).padStart(4, '0') + '.webp';
+    if (supabase) {
+        return supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(name).data.publicUrl;
+    }
+    return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${name}`;
+}
+
 let gameState = {
     points: 0,
     inventory: [],
@@ -8,6 +20,7 @@ let gameState = {
 };
 
 let questionsPool = [];
+let availableRanges = {};
 let currentRound = [];
 let currentIndex = 0;
 let isAnswering = false;
@@ -80,6 +93,15 @@ function loadData() {
 async function loadQuestions() {
     const response = await fetch('./data/questions.json');
     questionsPool = await response.json();
+}
+
+async function loadImageRanges() {
+    try {
+        const response = await fetch('./data/image-ranges.json');
+        availableRanges = await response.json();
+    } catch (e) {
+        availableRanges = RARITY_RANGES;
+    }
 }
 
 function shuffleArray(arr) {
@@ -331,6 +353,7 @@ function generateShuffleOrder(seed) {
 
 async function decryptImage(imageSrc, seed) {
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
@@ -404,7 +427,7 @@ function generatePlaceholder(monster) {
 function getMonsterImageRange(monster) {
     const tier = monsterDB.filter(m => m.rarity === monster.rarity);
     const index = tier.findIndex(m => m.id === monster.id);
-    const span = RARITY_RANGES[monster.rarity];
+    const span = availableRanges[monster.rarity] || RARITY_RANGES[monster.rarity];
     const total = span.end - span.start + 1;
     const per = Math.floor(total / tier.length);
     const rangeStart = span.start + index * per;
@@ -417,13 +440,12 @@ async function loadMonsterImage(monster) {
     const count = end - start + 1;
     for (let attempt = 0; attempt < 3; attempt++) {
         const n = start + Math.floor(Math.random() * count);
-        const file = './images/' + String(n).padStart(4, '0') + '.webp';
         try {
-            return await decryptImage(file, gameState.seed);
+            return await decryptImage(getMonsterImageUrl(n), gameState.seed);
         } catch (e) { }
     }
     try {
-        return await decryptImage('./images/0000.webp', gameState.seed);
+        return await decryptImage(getMonsterImageUrl(0), gameState.seed);
     } catch (e) { }
     return generatePlaceholder(monster);
 }
@@ -707,6 +729,7 @@ attachClearSaveListener();
 attachTicketListeners();
 attachSeedListener();
 attachHideFeaturesListener();
+loadImageRanges();
 loadQuestions().then(() => {
     startRound();
 });
