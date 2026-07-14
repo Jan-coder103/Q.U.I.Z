@@ -102,8 +102,10 @@
     </div>
 
     <script>
+        let uploadedFileName = null;
+
         const IMG_SIZE = 512;
-        const BLOCK_SIZE = 16;
+        const BLOCK_SIZE = 8;
         const GRID_DIM = IMG_SIZE / BLOCK_SIZE;
         const TOTAL_BLOCKS = GRID_DIM * GRID_DIM;
 
@@ -233,7 +235,9 @@
         function downloadScrambled() {
             const scrCanvas = document.getElementById('canvas-scrambled');
             const link = document.createElement('a');
-            link.download = 'monster-scrambled.webp';
+            const ext = uploadedFileName ? uploadedFileName.substring(uploadedFileName.lastIndexOf('.')) : '.webp';
+            const baseName = uploadedFileName ? uploadedFileName.substring(0, uploadedFileName.lastIndexOf('.')) : 'monster-scrambled';
+            link.download = baseName + ext;
             link.href = scrCanvas.toDataURL('image/webp');
             link.click();
         }
@@ -241,6 +245,7 @@
         function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
+            uploadedFileName = file.name;
             const img = new Image();
             img.onload = () => {
                 const canvas = document.getElementById('canvas-original');

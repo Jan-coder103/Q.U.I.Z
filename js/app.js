@@ -34,7 +34,7 @@ const monsterDB = [
 const ticketCosts = { cheap: 50, normal: 200, expensive: 1000 };
 
 const IMG_SIZE = 512;
-const BLOCK_SIZE = 16;
+const BLOCK_SIZE = 8;
 const GRID_DIM = IMG_SIZE / BLOCK_SIZE;
 const TOTAL_BLOCKS = GRID_DIM * GRID_DIM;
 
@@ -108,6 +108,8 @@ function shuffleArray(arr) {
 function updateScoreDisplay() {
     const el = document.getElementById('score-display');
     if (el) el.textContent = 'Points: ' + gameState.points;
+    const ticketsEl = document.getElementById('tickets-points');
+    if (ticketsEl) ticketsEl.textContent = 'Points: ' + gameState.points;
 }
 
 function startRound() {
@@ -577,6 +579,7 @@ function sellMonster(monster) {
     gameState.points += sellPrices[monster.rarity];
     saveData();
     updateScoreDisplay();
+    updateTicketsUI();
     closeModal();
     renderGallery();
 }
@@ -634,6 +637,7 @@ function buyTicket(ticketType) {
 
     gameState.points -= cost;
     saveData();
+    updateScoreDisplay();
     updateTicketsUI();
 
     if (Math.random() >= 0.5) {
@@ -652,6 +656,7 @@ function buyTicket(ticketType) {
         const refund = Math.ceil(cost / 2);
         gameState.points += refund;
         saveData();
+        updateScoreDisplay();
         updateTicketsUI();
         showModal("Duplicate found!", "All monsters of that rarity are owned! Refunded " + refund + " points.", null);
     }
